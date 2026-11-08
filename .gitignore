@@ -1,0 +1,12 @@
+# Python virtual environment — never commit this
+venv/
+__pycache__/
+*.pyc
+
+# The database file (we'll create it in a later stage)
+*.db
+
+# Editor / OS noise
+.DS_Store
+.vscode/
+.idea/
