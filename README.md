@@ -5,8 +5,7 @@ An app used to track my sleep. Log your morning vitals and see how your sleep, h
 **Live app:** https://sleep-tracker-cmw0.onrender.com
 
 ---
-d
-## Leveraged Knowledge in
+Leveraged Knowledge in
 
 ## Tech Stack
 
