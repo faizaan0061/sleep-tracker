@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SleepKer — Check In</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #eef6fb;
+      --white:     #ffffff;
+      --soft:      #f4f9fd;
+      --border:    #d6e8f5;
+      --primary:   #2563eb;
+      --primary-d: #1d4ed8;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --green:     #16a34a;
+      --red:       #dc2626;
+      --radius:    12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-inner {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    .greeting {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .btn-logout {
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Main layout ── */
+    .main {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .page-sub   { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Form ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .field { margin-bottom: 0; }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: var(--soft);
+      color: var(--text);
+      transition: border-color 0.15s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    .rating-group, .habit-group {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .rating-group button, .habit-group button {
+      flex: 1;
+      padding: 0.5rem 0.25rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .rating-group button.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .habit-group button.selected[data-value="false"] {
+      background: #dcfce7;
+      border-color: var(--green);
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .habit-group button.selected[data-value="true"] {
+      background: #fee2e2;
+      border-color: var(--red);
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    .habits-toggle {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 1rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin: 1rem 0 0.5rem;
+      transition: border-color 0.15s;
+    }
+
+    .habits-toggle:hover { border-color: var(--primary); }
+    .habits-toggle .arrow { font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; }
+    .habits-toggle.open .arrow { transform: rotate(180deg); }
+
+    .badge {
+      font-size: 0.72rem;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      margin-left: 0.5rem;
+    }
+
+    .badge.done { background: #dcfce7; color: #166534; }
+
+    #habits-panel { display: none; padding-top: 0.75rem; }
+    #habits-panel.open { display: block; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.15s;
+    }
+
+    .btn-submit:hover { background: var(--primary-d); }
+
+    #checkin-status {
+      font-size: 0.88rem;
+      margin-top: 0.6rem;
+      min-height: 1.2em;
+    }
+
+    #checkin-status.ok  { color: var(--green); }
+    #checkin-status.err { color: var(--red); }
+
+    /* ── Chart ── */
+    .chart-wrap { position: relative; height: 260px; }
+
+    @media (max-width: 768px) {
+      .app-grid  { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">SleepKer</a>
+    <div class="nav-right">
+      <span class="greeting" id="greeting"></span>
+      <button class="btn-logout" id="logout-btn">Log out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <h1 class="page-title">Daily Check-In</h1>
+  <p class="page-sub">Track your last 10 days of recovery.</p>
+
+  <div class="app-grid">
+
+    <!-- Left: form -->
+    <div class="card">
+      <p class="card-label">Today's Entry</p>
+      <form id="checkin-form">
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="date">Date</label>
+            <input type="date" id="date" required />
+          </div>
+          <div class="field">
+            <label for="resting_hr">Resting HR (bpm)</label>
+            <input type="number" id="resting_hr" min="30" max="120" placeholder="e.g. 58" required />
+          </div>
+          <div class="field">
+            <label for="sleep_hours">Sleep (hours)</label>
+            <input type="number" id="sleep_hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5" required />
+          </div>
+          <div class="field">
+            <label for="cardio_minutes">Cardio Yesterday (min)</label>
+            <input type="number" id="cardio_minutes" min="0" max="300" placeholder="e.g. 30" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Soreness <span style="color:var(--muted);font-weight:400">(1=none, 5=wrecked)</span></label>
+            <div class="rating-group" data-field="soreness">
+              <button type="button">1</button><button type="button">2</button>
+              <button type="button">3</button><button type="button">4</button>
+              <button type="button">5</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Energy <span style="color:var(--muted);font-weight:400">(1=low, 5=high)</span></label>
+            <div class="rating-group" data-field="energy">
+              <button type="button">1</button><button type="button">2</button>
+              <button type="button">3</button><button type="button">4</button>
+              <button type="button">5</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Mood <span style="color:var(--muted);font-weight:400">(1=low, 5=great)</span></label>
+            <div class="rating-group" data-field="mood">
+              <button type="button">1</button><button type="button">2</button>
+              <button type="button">3</button><button type="button">4</button>
+              <button type="button">5</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TO ADD A HABIT: copy a habit-group block below, change data-habit + label,
+             then add the same field in DailyLog + CheckInCreate in main.py -->
+        <button type="button" class="habits-toggle" id="habits-toggle">
+          <span>Habits <span class="badge" id="habits-badge">Required</span></span>
+          <span class="arrow">▼</span>
+        </button>
+
+        <div id="habits-panel">
+          <div class="form-grid" style="margin-top:0.5rem">
+            <div class="field">
+              <label>Alcohol yesterday?</label>
+              <div class="habit-group" data-habit="alcohol_use">
+                <button type="button" data-value="false">No</button>
+                <button type="button" data-value="true">Yes</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>Nap yesterday?</label>
+              <div class="habit-group" data-habit="naps">
+                <button type="button" data-value="false">No</button>
+                <button type="button" data-value="true">Yes</button>
+              </div>
+            </div>
+            <!-- ADD MORE HABITS HERE -->
+          </div>
+          <p id="habit-error" style="color:var(--red);font-size:0.85rem;min-height:1.2em"></p>
+        </div>
+
+        <button type="submit" class="btn-submit">Save Check-In</button>
+        <p id="checkin-status"></p>
+
+      </form>
+    </div>
+
+    <!-- Right: chart -->
+    <div class="card">
+      <p class="card-label">10-Day Readiness Trend</p>
+      <div class="chart-wrap">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem("token");
+  if (!token) { window.location.href = "/"; }
+
+  // Show greeting
+  const username = localStorage.getItem("username");
+  if (username) document.getElementById("greeting").textContent = "Hi, " + username;
+
+  // Set today's date
+  document.getElementById("date").value = new Date().toISOString().slice(0, 10);
+
+  // Logout
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    await fetch("/api/logout", { method: "POST", headers: { "Authorization": "Bearer " + token } });
+    localStorage.clear();
+    window.location.href = "/";
+  });
+
+  // Rating buttons
+  document.querySelectorAll(".rating-group").forEach(group => {
+    const btns = group.querySelectorAll("button");
+    btns.forEach(btn => btn.addEventListener("click", () => {
+      btns.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+    }));
+  });
+
+  // Habits toggle
+  document.getElementById("habits-toggle").addEventListener("click", () => {
+    document.getElementById("habits-toggle").classList.toggle("open");
+    document.getElementById("habits-panel").classList.toggle("open");
+  });
+
+  // Habit yes/no buttons
+  document.querySelectorAll(".habit-group").forEach(group => {
+    const btns = group.querySelectorAll("button");
+    btns.forEach(btn => btn.addEventListener("click", () => {
+      btns.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      updateHabitBadge();
+    }));
+  });
+
+  function updateHabitBadge() {
+    const all   = [...document.querySelectorAll(".habit-group")].every(g => g.querySelector(".selected"));
+    const badge = document.getElementById("habits-badge");
+    badge.textContent = all ? "✓ Done" : "Required";
+    badge.className   = all ? "badge done" : "badge";
+  }
+
+  function getHabit(name) {
+    const sel = document.querySelector(`.habit-group[data-habit="${name}"] .selected`);
+    return sel ? sel.dataset.value === "true" : null;
+  }
+
+  function getRating(name) {
+    const sel = document.querySelector(`.rating-group[data-field="${name}"] .selected`);
+    return sel ? parseInt(sel.textContent) : null;
+  }
+
+  // Chart
+  const chart = new Chart(document.getElementById("myChart").getContext("2d"), {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label: "Readiness",
+        data: [],
+        borderColor: "#2563eb",
+        backgroundColor: "rgba(37,99,235,0.08)",
+        borderWidth: 2,
+        pointBackgroundColor: "#2563eb",
+        pointRadius: 5,
+        tension: 0.35,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { min: 0, max: 100, ticks: { color: "#64748b" }, grid: { color: "#e2e8f0" } },
+        x: {                   ticks: { color: "#64748b" }, grid: { color: "#e2e8f0" } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  async function loadData() {
+    const res = await fetch("/api/checkins", { headers: { "Authorization": "Bearer " + token } });
+    if (res.status === 401) { localStorage.clear(); window.location.href = "/"; return; }
+    const logs = await res.json();
+    logs.sort((a, b) => a.date.localeCompare(b.date));
+    const last10 = logs.slice(-10);
+    chart.data.labels           = last10.map(l => l.date);
+    chart.data.datasets[0].data = last10.map(l => l.readiness_score);
+    chart.update();
+  }
+
+  loadData();
+
+  // Form submit
+  document.getElementById("checkin-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const soreness    = getRating("soreness");
+    const energy      = getRating("energy");
+    const mood        = getRating("mood");
+    const alcohol_use = getHabit("alcohol_use");
+    const naps        = getHabit("naps");
+    const statusEl    = document.getElementById("checkin-status");
+    const habitErr    = document.getElementById("habit-error");
+
+    if (!soreness || !energy || !mood) {
+      statusEl.textContent = "Please select a value for all ratings.";
+      statusEl.className = "err";
+      return;
+    }
+
+    if (alcohol_use === null || naps === null) {
+      habitErr.textContent = "Please answer all habit questions.";
+      document.getElementById("habits-toggle").classList.add("open");
+      document.getElementById("habits-panel").classList.add("open");
+      return;
+    }
+    habitErr.textContent = "";
+
+    const payload = {
+      date:           document.getElementById("date").value,
+      resting_hr:     parseInt(document.getElementById("resting_hr").value),
+      sleep_hours:    parseFloat(document.getElementById("sleep_hours").value),
+      soreness, energy, mood,
+      cardio_minutes: parseInt(document.getElementById("cardio_minutes").value) || 0,
+      alcohol_use, naps
+    };
+
+    const res = await fetch("/api/checkin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) { localStorage.clear(); window.location.href = "/"; return; }
+      const err = await res.json();
+      statusEl.textContent = "Error: " + (err.detail || "Could not save.");
+      statusEl.className = "err";
+      return;
+    }
+
+    statusEl.textContent = "✓ Check-in saved!";
+    statusEl.className   = "ok";
+    document.querySelectorAll(".rating-group button, .habit-group button").forEach(b => b.classList.remove("selected"));
+    updateHabitBadge();
+    loadData();
+  });
+</script>
+</body>
+</html>

@@ -1,167 +1,189 @@
 <!DOCTYPE html>
-<!--
-  DOCTYPE tells the browser "this is a modern HTML5 page."
-  Without it, browsers go into "quirks mode" and render things differently.
--->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!--
-    charset="UTF-8" means the file can contain any character from any language.
-    Without it, special characters (like emojis or accented letters) can break.
-  -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!--
-    viewport makes the page look correct on phones.
-    Without it, mobile browsers zoom out and everything looks tiny.
-  -->
-  <title>Sleep Tracker</title>
-
-  <!--
-    Chart.js is a popular, free library for drawing charts.
-    Instead of installing it, we load it straight from the internet (a CDN).
-    CDN = Content Delivery Network — a server that hosts libraries for you.
-    This one line gives us access to a whole charting system.
-  -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
+  <title>SleepKer</title>
   <style>
-    /*
-      CSS = how things look. Every rule is: selector { property: value; }
-      The selector picks which HTML element(s) to style.
-    */
+    /* ── Base ─────────────────────────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Reset & base ─────────────────────────────────────────────── */
-    * {
-      box-sizing: border-box; /* padding is included in width, not added on top */
-      margin: 0;
-      padding: 0;
+    :root {
+      --bg:        #eef6fb;
+      --white:     #ffffff;
+      --soft:      #f4f9fd;
+      --border:    #d6e8f5;
+      --primary:   #2563eb;
+      --primary-d: #1d4ed8;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --green:     #16a34a;
+      --red:       #dc2626;
+      --radius:    12px;
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      /*
-        -apple-system uses the system font on Mac/iPhone.
-        BlinkMacSystemFont is the same for Chrome on Mac.
-        "Segoe UI" is Windows. sans-serif is the fallback for everything else.
-        The browser picks the first one it recognises.
-      */
-      background: #0f0f13;   /* very dark background */
-      color: #e8e8f0;        /* light text — high contrast on dark bg */
-      min-height: 100vh;     /* at least the full screen height */
-      padding: 2rem;         /* breathing room on all sides */
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
     }
 
-    /* ── Layout wrapper ───────────────────────────────────────────── */
+    h1 { font-size: 2.4rem; font-weight: 800; line-height: 1.2; }
+    h2 { font-size: 1.8rem; font-weight: 700; }
+    h3 { font-size: 1.1rem; font-weight: 600; }
+
     .container {
-      max-width: 860px;      /* never wider than 860px, even on big screens */
-      margin: 0 auto;        /* center it horizontally */
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
     }
 
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
+    section { padding: 5rem 0; }
+
+    /* ── Nav ──────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover { color: var(--primary); }
+
+    .nav-cta {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .nav-cta:hover { background: var(--primary-d); }
+
+    /* ── Hero ─────────────────────────────────────────────────────────── */
+    #hero {
+      padding: 5rem 0 4rem;
+      background: linear-gradient(160deg, #e0f0ff 0%, #f4f9fd 60%, #eef6fb 100%);
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-text p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin: 1rem 0 2rem;
+      max-width: 440px;
+    }
+
+    .hero-pill {
+      display: inline-block;
+      background: #dbeafe;
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.8rem;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Auth box (inside hero) ───────────────────────────────────────── */
+    .auth-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 24px rgba(37,99,235,0.08);
+    }
+
+    .auth-card h3 {
+      font-size: 1.2rem;
       margin-bottom: 0.25rem;
-      color: #ffffff;
     }
 
-    .subtitle {
-      color: #888;
-      margin-bottom: 2.5rem;
-      font-size: 0.95rem;
-    }
-
-    /* ── Cards (the white-ish boxes) ──────────────────────────────── */
-    .card {
-      background: #1c1c24;   /* slightly lighter than the page bg */
-      border: 1px solid #2a2a38;
-      border-radius: 12px;
-      padding: 1.5rem;
+    .auth-card .sub {
+      color: var(--muted);
+      font-size: 0.88rem;
       margin-bottom: 1.5rem;
     }
 
-    .card h2 {
-      font-size: 1.1rem;
-      color: #a0a0c0;
-      margin-bottom: 1.25rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.8rem;
-    }
-
-    /* ── Form ─────────────────────────────────────────────────────── */
-    .form-grid {
-      display: grid;
-      /*
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))
-        means: make as many columns as fit, each at least 180px wide,
-        sharing remaining space equally (1fr = 1 fraction of free space).
-        On a wide screen you get 3 columns; on a phone, 1.
-      */
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
+    .field { margin-bottom: 1rem; }
 
     .field label {
-      display: block;         /* label on its own line above the input */
+      display: block;
       font-size: 0.8rem;
-      color: #888;
-      margin-bottom: 0.4rem;
+      font-weight: 600;
+      color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
     }
 
     .field input {
       width: 100%;
-      padding: 0.55rem 0.75rem;
-      background: #0f0f13;
-      border: 1px solid #2a2a38;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      color: #e8e8f0;
       font-size: 1rem;
+      background: var(--soft);
+      color: var(--text);
+      transition: border-color 0.15s;
     }
 
     .field input:focus {
       outline: none;
-      border-color: #5b5bf0;  /* purple glow when you click into the field */
+      border-color: var(--primary);
+      background: #fff;
     }
 
-    /* ── Rating buttons (1–5) ─────────────────────────────────────── */
-    .rating-group {
-      display: flex;
-      gap: 0.4rem;
-    }
-
-    .rating-group button {
-      flex: 1;
-      padding: 0.5rem;
-      background: #0f0f13;
-      border: 1px solid #2a2a38;
-      border-radius: 6px;
-      color: #888;
-      font-size: 0.9rem;
-      cursor: pointer;        /* hand cursor on hover */
-      transition: all 0.15s; /* smooth colour change */
-    }
-
-    /*
-      .selected is a CSS class we add with JavaScript when the user clicks a
-      button. CSS doesn't know which button was clicked — JS tells it by adding
-      the class, and then this rule styles it differently.
-    */
-    .rating-group button.selected {
-      background: #5b5bf0;
-      border-color: #5b5bf0;
-      color: #fff;
-      font-weight: 600;
-    }
-
-    /* ── Submit button ────────────────────────────────────────────── */
-    .btn-submit {
+    .btn-primary {
       width: 100%;
       padding: 0.75rem;
-      background: #5b5bf0;
+      background: var(--primary);
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -169,720 +191,630 @@
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s;
+      margin-top: 0.25rem;
     }
 
-    .btn-submit:hover { background: #4a4ad8; }
-
-    /* ── Status message ───────────────────────────────────────────── */
-    #status {
-      margin-top: 0.75rem;
-      font-size: 0.9rem;
-      min-height: 1.2em;    /* reserve space so page doesn't jump */
-    }
-    #status.ok  { color: #4caf8a; }  /* green for success */
-    #status.err { color: #e05252; }  /* red for error */
-
-    /* ── Chart ────────────────────────────────────────────────────── */
-    .chart-wrap {
-      position: relative;
-      height: 220px;         /* fixed height for the chart canvas */
-    }
-
-    /* ── History table ────────────────────────────────────────────── */
-    table {
-      width: 100%;
-      border-collapse: collapse;  /* no double borders between cells */
-      font-size: 0.88rem;
-    }
-
-    th {
-      text-align: left;
-      color: #666;
-      padding: 0.4rem 0.6rem;
-      border-bottom: 1px solid #2a2a38;
-      font-weight: 500;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-    }
-
-    td {
-      padding: 0.55rem 0.6rem;
-      border-bottom: 1px solid #1e1e28;
-      color: #c8c8d8;
-    }
-
-    tr:last-child td { border-bottom: none; }
-
-    /* Score badge — colour depends on the score value, set via JS */
-    .score {
-      font-weight: 700;
-      padding: 0.2rem 0.55rem;
-      border-radius: 99px;
-      font-size: 0.8rem;
-    }
-    .score.high   { background: #1a3a2a; color: #4caf8a; }
-    .score.medium { background: #3a2e10; color: #d4a030; }
-    .score.low    { background: #3a1a1a; color: #e05252; }
-
-    #no-data {
-      text-align: center;
-      color: #555;
-      padding: 2rem 0;
-    }
-
-    /* ── Collapsible habits toggle ────────────────────────────────── */
-    .habits-toggle {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.7rem 1rem;
-      background: #0f0f13;
-      border: 1px solid #2a2a38;
-      border-radius: 8px;
-      color: #c8c8d8;
-      font-size: 0.95rem;
-      cursor: pointer;
-      margin-bottom: 1.25rem;
-      transition: border-color 0.15s;
-    }
-
-    .habits-toggle:hover { border-color: #5b5bf0; }
-
-    .habits-toggle .arrow {
-      font-size: 0.75rem;
-      color: #555;
-      transition: transform 0.2s;
-    }
-
-    .habits-toggle.open .arrow { transform: rotate(180deg); }
-
-    .habits-toggle .badge {
-      font-size: 0.75rem;
-      background: #3a2a10;
-      color: #d4a030;
-      padding: 0.15rem 0.5rem;
-      border-radius: 99px;
-    }
-
-    .habits-toggle .badge.done {
-      background: #1a3a2a;
-      color: #4caf8a;
-    }
-
-    #habits-panel { display: none; }
-    #habits-panel.open { display: block; }
-
-    /* ── Habit yes/no buttons ─────────────────────────────────────── */
-    .habit-group {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .habit-group button {
-      flex: 1;
-      padding: 0.55rem;
-      background: #0f0f13;
-      border: 1px solid #2a2a38;
-      border-radius: 6px;
-      color: #888;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .habit-group button.selected[data-value="false"] {
-      background: #1a3a2a;
-      border-color: #4caf8a;
-      color: #4caf8a;
-      font-weight: 600;
-    }
-
-    .habit-group button.selected[data-value="true"] {
-      background: #3a1a1a;
-      border-color: #e05252;
-      color: #e05252;
-      font-weight: 600;
-    }
-
-    /* ── Auth screen ──────────────────────────────────────────────── */
-    #auth-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 80vh;
-    }
-
-    .auth-box {
-      background: #1c1c24;
-      border: 1px solid #2a2a38;
-      border-radius: 16px;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .auth-box h2 {
-      color: #fff;
-      font-size: 1.4rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .auth-box .subtitle {
-      margin-bottom: 1.5rem;
-      font-size: 0.88rem;
-    }
+    .btn-primary:hover { background: var(--primary-d); }
 
     .auth-toggle {
-      margin-top: 1rem;
       text-align: center;
-      font-size: 0.88rem;
-      color: #666;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 1rem;
     }
 
     .auth-toggle span {
-      color: #5b5bf0;
+      color: var(--primary);
       cursor: pointer;
-      text-decoration: underline;
+      font-weight: 600;
     }
 
     #auth-error {
-      margin-top: 0.75rem;
-      font-size: 0.88rem;
-      color: #e05252;
+      color: var(--red);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
       min-height: 1.2em;
     }
 
-    /* ── Top bar (shown when logged in) ──────────────────────────── */
-    .topbar {
+    /* ── About / Info section ─────────────────────────────────────────── */
+    #about { background: var(--white); }
+
+    .section-label {
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-sub {
+      text-align: center;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 3rem;
+      font-size: 1rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .info-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--soft);
+    }
+
+    .info-img-placeholder {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-card-body { padding: 1.25rem; }
+
+    .info-card-body h3 {
+      margin-bottom: 0.6rem;
+      color: var(--text);
+    }
+
+    .info-card-body p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+
+    /* ── App section (shown after login) ─────────────────────────────── */
+    #app { display: none; background: var(--soft); }
+
+    .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
     }
 
-    .topbar h1 { margin-bottom: 0; }
+    .app-header h2 { font-size: 1.4rem; }
 
     .btn-logout {
       padding: 0.4rem 1rem;
-      background: transparent;
-      border: 1px solid #2a2a38;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      color: #888;
+      background: transparent;
+      color: var(--muted);
       font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.15s;
     }
 
-    .btn-logout:hover {
-      border-color: #e05252;
-      color: #e05252;
-    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
-    /* ── Info columns ─────────────────────────────────────────────── */
-    .info-grid {
+    .app-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
     }
 
-    .info-col {
-      background: #1c1c24;
-      border: 1px solid #2a2a38;
-      border-radius: 12px;
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       padding: 1.5rem;
     }
 
-    .info-col h3 {
+    .card h3 {
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #5b5bf0;
-      margin-bottom: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
     }
 
-    .info-col p {
+    /* ── Form elements ────────────────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .rating-group, .habit-group {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .rating-group button, .habit-group button {
+      flex: 1;
+      padding: 0.5rem 0.25rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .rating-group button.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .habit-group button.selected[data-value="false"] {
+      background: #dcfce7;
+      border-color: var(--green);
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .habit-group button.selected[data-value="true"] {
+      background: #fee2e2;
+      border-color: var(--red);
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    /* Habits toggle */
+    .habits-toggle {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 1rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin: 1rem 0 0.5rem;
+      transition: border-color 0.15s;
+    }
+
+    .habits-toggle:hover { border-color: var(--primary); }
+    .habits-toggle .arrow { font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; }
+    .habits-toggle.open .arrow { transform: rotate(180deg); }
+
+    .badge {
+      font-size: 0.72rem;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      margin-left: 0.5rem;
+    }
+
+    .badge.done { background: #dcfce7; color: #166534; }
+
+    #habits-panel { display: none; padding-top: 0.75rem; }
+    #habits-panel.open { display: block; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.15s;
+    }
+
+    .btn-submit:hover { background: var(--primary-d); }
+
+    #checkin-status {
       font-size: 0.88rem;
-      color: #9090a8;
-      line-height: 1.65;
+      margin-top: 0.6rem;
+      min-height: 1.2em;
+    }
+
+    #checkin-status.ok  { color: var(--green); }
+    #checkin-status.err { color: var(--red); }
+
+    /* Chart */
+    .chart-wrap { position: relative; height: 240px; }
+
+    /* ── FAQ ──────────────────────────────────────────────────────────── */
+    #faq { background: var(--white); }
+
+    .faq-list { max-width: 720px; margin: 0 auto; }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-question {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem 0;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      gap: 1rem;
+    }
+
+    .faq-question .faq-icon {
+      font-size: 1.2rem;
+      color: var(--primary);
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .faq-question.open .faq-icon { transform: rotate(45deg); }
+
+    .faq-answer {
+      display: none;
+      padding: 0 0 1.1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .faq-answer.open { display: block; }
+
+    /* ── Footer ───────────────────────────────────────────────────────── */
+    footer {
+      background: var(--text);
+      color: #94a3b8;
+      padding: 2.5rem 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: #fff; }
+
+    .footer-copy { font-size: 0.85rem; }
+
+    /* ── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      h1 { font-size: 1.8rem; }
+      .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .app-grid   { grid-template-columns: 1fr; }
+      .form-grid  { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; text-align: center; }
     }
   </style>
 </head>
-
 <body>
 
-  <!-- ── AUTH SCREEN (shown when logged out) ───────────────────────── -->
-  <!--
-    display:none hides this entire section. JavaScript shows or hides it
-    depending on whether the user is logged in.
-  -->
-  <div id="auth-screen" style="display:none">
-    <div class="auth-box">
-      <h2 id="auth-title">Welcome back</h2>
-      <p class="subtitle" id="auth-subtitle">Log in to your account.</p>
+<!-- ── NAV ─────────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="container nav-inner">
+    <span class="nav-logo">SleepKer</span>
+    <ul class="nav-links" id="main-nav">
+      <li><a href="#about">About</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <button class="nav-cta" id="nav-login-btn">Log In</button>
+  </div>
+</nav>
+
+<!-- ── HERO + AUTH ──────────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="container hero-inner">
+
+    <!-- Left: headline -->
+    <div class="hero-text">
+      <span class="hero-pill">Free · No device needed</span>
+      <h1>Understand Your Sleep.<br>Track Your Recovery.</h1>
+      <p>Log your morning vitals daily and see how your sleep, habits, and cardio affect how you feel — all in one place, with no wearable required.</p>
+    </div>
+
+    <!-- Right: auth card -->
+    <div class="auth-card" id="auth-card">
+      <h3 id="auth-title">Welcome back</h3>
+      <p class="sub" id="auth-subtitle">Log in to your account.</p>
 
       <form id="auth-form">
-        <div class="field" style="margin-bottom:1rem">
-          <label for="auth-username">Username</label>
-          <input type="text" id="auth-username" autocomplete="username" required />
+        <div class="field">
+          <label for="auth-email">Email</label>
+          <input type="email" id="auth-email" placeholder="you@email.com" autocomplete="email" required />
         </div>
-        <div class="field" style="margin-bottom:1.25rem">
+        <div class="field">
           <label for="auth-password">Password</label>
-          <!--
-            type="password" masks the characters as dots.
-            autocomplete="current-password" lets the browser offer saved passwords.
-          -->
           <input type="password" id="auth-password" autocomplete="current-password" required />
         </div>
-
-        <button type="submit" class="btn-submit" id="auth-btn">Log In</button>
+        <button type="submit" class="btn-primary" id="auth-btn">Log In</button>
         <p id="auth-error"></p>
       </form>
 
-      <p class="auth-toggle" id="auth-toggle-text">
+      <p class="auth-toggle">
         Don't have an account? <span id="auth-switch">Sign up</span>
       </p>
     </div>
+
   </div>
+</section>
 
-  <!-- ── MAIN APP (shown when logged in) ───────────────────────────── -->
-  <div id="app" style="display:none">
+<!-- ── ABOUT / INFO ─────────────────────────────────────────────────────── -->
+<section id="about">
   <div class="container">
+    <p class="section-label">Why it matters</p>
+    <h2 class="section-title">Three signals. One score.</h2>
+    <p class="section-sub">Your body tells you how recovered it is every morning. You just need to know what to listen for.</p>
 
-    <div class="topbar">
-      <div>
-        <h1>Sleep Tracker</h1>
-        <p class="subtitle">Log your morning check-in and track your readiness over time.</p>
-      </div>
-      <!--
-        Logout button — calls our /api/logout endpoint which deletes the
-        session token from the database, then clears it from the browser.
-      -->
-      <button class="btn-logout" id="logout-btn">Log out</button>
-    </div>
-
-    <!-- ── CHECK-IN FORM ─────────────────────────────────────────── -->
-    <!--
-      A <form> groups related inputs together.
-      id="checkin-form" lets JavaScript find this element by its id.
-      We handle submission in JS (not the default browser submit) so we can
-      talk to our API without reloading the page.
-    -->
-    <div class="card">
-      <h2>Today's Check-In</h2>
-      <form id="checkin-form">
-
-        <div class="form-grid">
-          <!-- Date field -->
-          <div class="field">
-            <label for="date">Date</label>
-            <!--
-              type="date" gives a built-in date picker in the browser.
-              id="date" links it to its <label> (clicking the label focuses input).
-            -->
-            <input type="date" id="date" required />
-          </div>
-
-          <!-- Resting HR field -->
-          <div class="field">
-            <label for="resting_hr">Resting Heart Rate (bpm)</label>
-            <input type="number" id="resting_hr" min="30" max="120" placeholder="e.g. 58" required />
-          </div>
-
-          <!-- Sleep field -->
-          <div class="field">
-            <label for="sleep_hours">Sleep (hours)</label>
-            <input type="number" id="sleep_hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5" required />
-          </div>
-        </div>
-
-        <!-- Rating fields (1–5 buttons) -->
-        <div class="form-grid">
-          <div class="field">
-            <label>Soreness <span style="color:#555">(1=none, 5=wrecked)</span></label>
-            <div class="rating-group" data-field="soreness">
-              <button type="button">1</button>
-              <button type="button">2</button>
-              <button type="button">3</button>
-              <button type="button">4</button>
-              <button type="button">5</button>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Energy <span style="color:#555">(1=drained, 5=great)</span></label>
-            <div class="rating-group" data-field="energy">
-              <button type="button">1</button>
-              <button type="button">2</button>
-              <button type="button">3</button>
-              <button type="button">4</button>
-              <button type="button">5</button>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Mood <span style="color:#555">(1=low, 5=great)</span></label>
-            <div class="rating-group" data-field="mood">
-              <button type="button">1</button>
-              <button type="button">2</button>
-              <button type="button">3</button>
-              <button type="button">4</button>
-              <button type="button">5</button>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="cardio_minutes">Cardio Yesterday (min)</label>
-            <input type="number" id="cardio_minutes" min="0" max="300"
-          placeholder="e.g. 30" />
-          </div>
-        </div>
-
-        <!-- ── HABITS (collapsible) ────────────────────────────────
-             Click the button to expand. Required before submitting.
-             TO ADD A NEW HABIT:
-               1. Copy a <div class="field"> block inside #habits-panel
-               2. Change data-habit and the label text
-               3. Add the same field to DailyLog + CheckInCreate in main.py
-               4. Add getHabit("your_field") validation in the JS below
-        -->
-        <button type="button" class="habits-toggle" id="habits-toggle">
-          <span>Habits <span class="badge" id="habits-badge">Required</span></span>
-          <span class="arrow">▼</span>
-        </button>
-
-        <div id="habits-panel">
-          <div class="form-grid" style="margin-bottom:1rem">
-
-            <div class="field">
-              <label>Alcohol use yesterday?</label>
-              <div class="habit-group" data-habit="alcohol_use">
-                <button type="button" data-value="false">No</button>
-                <button type="button" data-value="true">Yes</button>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Nap yesterday?</label>
-              <div class="habit-group" data-habit="naps">
-                <button type="button" data-value="false">No</button>
-                <button type="button" data-value="true">Yes</button>
-              </div>
-            </div>
-
-            <!-- ── ADD MORE HABITS HERE ──────────────────────────────
-            <div class="field">
-              <label>Meditation?</label>
-              <div class="habit-group" data-habit="meditation">
-                <button type="button" data-value="false">No</button>
-                <button type="button" data-value="true">Yes</button>
-              </div>
-            </div>
-            ──────────────────────────────────────────────────────── -->
-
-          </div>
-          <p id="habit-error" style="color:#e05252; font-size:0.88rem; margin-bottom:0.75rem; min-height:1.2em"></p>
-        </div>
-
-        <button type="submit" class="btn-submit">Save Check-In</button>
-        <!--
-          <p id="status"> is an empty paragraph. JavaScript will write a
-          success or error message into it after the form is submitted.
-        -->
-        <p id="status"></p>
-
-      </form>
-    </div>
-
-    <!-- ── INFO COLUMNS ─────────────────────────────────────────── -->
     <div class="info-grid">
-      <div class="info-col">
-        <h3>Resting Heart Rate</h3>
-        <p>Resting heart rate (RHR) is one of the clearest signals of overnight recovery. A lower RHR generally reflects better cardiovascular fitness, and regular cardio lowers it over time by helping the heart pump more blood with each beat. A rise of 5 or more bpm above your personal baseline is an early warning sign of stress, illness, or incomplete recovery.</p>
+
+      <div class="info-card">
+        <img src="/static/images/rhr.png" alt="Resting heart rate" style="width:100%;height:180px;object-fit:cover;border-bottom:1px solid var(--border);" />
+        <div class="info-card-body">
+          <h3>Resting Heart Rate</h3>
+          <p>Your resting heart rate (RHR) is one of the clearest signals of overnight recovery. A lower RHR reflects better cardiovascular fitness, and regular cardio lowers it over time. A rise of 5+ bpm above your baseline is an early warning of stress, illness, or incomplete recovery.</p>
+        </div>
       </div>
 
-      <div class="info-col">
-        <h3>Sleep Target</h3>
-        <p>Sleep is your most powerful recovery tool. During deep sleep, your body releases growth hormone, repairs muscle, and clears metabolic waste from the brain. Most adults need 7–9 hours to move through all stages of sleep and wake up fully restored.</p>
+      <div class="info-card">
+        <img src="/static/images/sleep.png" alt="Sleeping person" style="width:100%;height:180px;object-fit:cover;border-bottom:1px solid var(--border);" />
+        <div class="info-card-body">
+          <h3>Sleep Duration</h3>
+          <p>Sleep is your most powerful recovery tool. During deep sleep your body releases growth hormone, repairs muscle, and clears metabolic waste from the brain. Most adults need 7–9 hours — but consistency matters just as much as duration. Going to bed at the same time every night keeps your circadian rhythm calibrated and makes those hours count.</p>
+        </div>
       </div>
 
-      <div class="info-col">
-        <h3>Sleep and Wake Consistency</h3>
-        <p>Your circadian rhythm, the body's internal 24-hour clock, controls when you feel sleepy and when key hormones are released. Going to bed and waking at the same times every day, including weekends, keeps that clock in sync. Irregular schedules fragment sleep, leaving you less rested even after the same number of hours.</p>
+      <div class="info-card">
+        <img src="/static/images/cardio.png" alt="Cardio" style="width:100%;height:180px;object-fit:cover;border-bottom:1px solid var(--border);" />
+        <div class="info-card-body">
+          <h3>Cardio Duration</h3>
+          <p>30–90 minutes of cardio the previous day is the sweet spot for lowering your sleeping heart rate and improving sleep depth. Beyond 90 minutes, excess cortisol from overtraining can actually disrupt sleep and raise your resting heart rate the next morning — working against everything you're trying to build.</p>
+        </div>
       </div>
+
     </div>
+  </div>
+</section>
 
-  </div><!-- end .container -->
-  </div><!-- end #app -->
+<!-- ── FAQ ─────────────────────────────────────────────────────────────── -->
+<section id="faq">
+  <div class="container">
+    <p class="section-label">Common questions</p>
+    <h2 class="section-title">FAQ</h2>
+    <p class="section-sub">Everything you need to know about tracking your sleep and recovery.</p>
+
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Do I need to wear any device or sensor?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          No. Sleep Tracker is entirely self-reported — no wearable, no sensor, no subscription hardware required. You log your own morning vitals (resting heart rate, hours slept, how you feel) and the app does the rest. All you need is this website and 60 seconds each morning.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Is 100% sleep efficiency the goal?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Not necessarily. Sleep efficiency of 85–90% is considered healthy for most adults. Chasing 100% can actually be a sign of sleep deprivation — when you're exhausted, you fall asleep faster and wake less, which looks efficient but means your body is running a deficit. Aim for consistent, restful sleep rather than a perfect number.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Should I count naps in my sleep efficiency calculation?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Log naps separately using the Habits section, not as part of your overnight sleep hours. Naps under 30 minutes (power naps) can improve alertness without disrupting nighttime sleep. Longer naps — especially after 3pm — can reduce sleep drive and make it harder to fall asleep at night, which is why we track them as a separate habit.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How is my readiness score calculated?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Your score (0–100) is a weighted blend of your inputs: sleep hours (30%), soreness (25%), energy (20%), mood (15%), and cardio duration (10%). Each is normalized to a 0–100 scale and combined. The weights reflect how much each factor is known to impact recovery based on sports science research.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How often should I log a check-in?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Every morning, ideally within 30 minutes of waking before coffee or exercise. Consistency is more valuable than perfection — 7 honest check-ins a week beat 3 perfect ones. The 10-day chart becomes meaningful after just one week of daily logging.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What is a healthy resting heart rate?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          For most adults, 60–100 bpm is considered normal. Athletes often sit between 40–60 bpm due to a stronger, more efficient heart. What matters most is YOUR baseline — track your own average and look for deviations. A consistent rise of 5–7 bpm above your personal baseline is a more useful signal than any single number.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How much cardio is too much?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          For sleep quality, the sweet spot is 30–90 minutes of moderate cardio. Beyond 90 minutes, cortisol levels remain elevated for longer, which can fragment sleep and raise your resting heart rate the next morning. If you're doing long training sessions, focus on recovery nutrition and an earlier workout time (morning or early afternoon rather than evening).
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Can I use this app if I don't exercise?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Absolutely. Just enter 0 for cardio minutes. The app still tracks your sleep, soreness, energy, and mood — all of which are valuable signals regardless of fitness level. In fact, tracking these without exercise gives you a clean baseline to compare against once you do start adding activity.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How long until I see meaningful trends in my data?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Most people start seeing patterns after 7–10 days of consistent logging — which is exactly why the chart shows your last 10 days. After 30 days you'll have enough data to identify correlations: which habits reliably improve your score, which ones hurt it, and how your body responds to different training loads.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ───────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container footer-inner">
+    <p class="footer-copy">&copy; 2026 SleepKer. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#app">Check-In</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </div>
+</footer>
 
 
-  <script>
+<script>
+  // ── AUTH STATE ────────────────────────────────────────────────────────
+  let token = localStorage.getItem("token");
 
-    // ── AUTH STATE ───────────────────────────────────────────────────
-    // localStorage persists data in the browser even after the tab closes.
-    // We store the token here so the user stays logged in on refresh.
-    let token    = localStorage.getItem("token");
-    let username = localStorage.getItem("username");
+  // If already logged in, go straight to the check-in page
+  if (token) { window.location.href = "/checkin"; }
 
-    // ── SHOW THE RIGHT SCREEN ────────────────────────────────────────
-    // On every page load, check if we have a token.
-    // If yes → show the app. If no → show the login screen.
-    function showApp() {
-      document.getElementById("auth-screen").style.display = "none";
-      document.getElementById("app").style.display = "block";
-    }
+  // Nav login button scrolls to top
+  document.getElementById("nav-login-btn").addEventListener("click", () => {
+    document.getElementById("hero").scrollIntoView({ behavior: "smooth" });
+  });
 
-    function showAuth() {
-      document.getElementById("auth-screen").style.display = "flex";
-      document.getElementById("app").style.display = "none";
-    }
+  // ── TOGGLE LOGIN / REGISTER ───────────────────────────────────────────
+  let isLogin = true;
 
-    if (token) {
-      showApp();
-    } else {
-      showAuth();
-    }
+  function refreshAuthToggle() {
+    document.getElementById("auth-title").textContent    = isLogin ? "Welcome back"       : "Create account";
+    document.getElementById("auth-subtitle").textContent = isLogin ? "Log in to your account." : "Pick an email and password.";
+    document.getElementById("auth-btn").textContent      = isLogin ? "Log In"             : "Sign Up";
+    document.getElementById("auth-switch").textContent   = isLogin ? "Sign up"            : "Log in";
+  }
 
-    // ── TOGGLE BETWEEN LOGIN AND REGISTER ───────────────────────────
-    // The auth box serves both login and register — we just swap the labels.
-    let isLogin = true;
+  document.getElementById("auth-switch").addEventListener("click", () => {
+    isLogin = !isLogin;
+    refreshAuthToggle();
+    document.getElementById("auth-error").textContent = "";
+  });
 
-    document.getElementById("auth-switch").addEventListener("click", () => {
-      isLogin = !isLogin;  // flip the mode
-      if (isLogin) {
-        document.getElementById("auth-title").textContent    = "Welcome back";
-        document.getElementById("auth-subtitle").textContent = "Log in to your account.";
-        document.getElementById("auth-btn").textContent      = "Log In";
-        document.getElementById("auth-toggle-text").innerHTML =
-          'Don\'t have an account? <span id="auth-switch">Sign up</span>';
-      } else {
-        document.getElementById("auth-title").textContent    = "Create account";
-        document.getElementById("auth-subtitle").textContent = "Pick a username and password.";
-        document.getElementById("auth-btn").textContent      = "Sign Up";
-        document.getElementById("auth-toggle-text").innerHTML =
-          'Already have an account? <span id="auth-switch">Log in</span>';
-      }
-      // Re-attach the click listener since we replaced the element's HTML
-      document.getElementById("auth-switch").addEventListener("click", arguments.callee.bind(this));
-      document.getElementById("auth-error").textContent = "";
-    });
+  // ── AUTH FORM ─────────────────────────────────────────────────────────
+  document.getElementById("auth-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email    = document.getElementById("auth-email").value.trim();
+    const password = document.getElementById("auth-password").value;
+    const btn      = document.getElementById("auth-btn");
+    const errorEl  = document.getElementById("auth-error");
 
-    // ── AUTH FORM SUBMIT (login or register) ────────────────────────
-    document.getElementById("auth-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    btn.textContent = "Please wait…";
+    errorEl.textContent = "";
 
-      const username_input = document.getElementById("auth-username").value.trim();
-      const password_input = document.getElementById("auth-password").value;
-      const errorEl        = document.getElementById("auth-error");
-      const btn            = document.getElementById("auth-btn");
-
-      btn.textContent = "Please wait…";
-      errorEl.textContent = "";
-
-      const endpoint = isLogin ? "/api/login" : "/api/register";
-
-      try {
-        const res  = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: username_input, password: password_input })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          // Show the error message from the server
-          errorEl.textContent = data.detail || "Something went wrong.";
-          btn.textContent = isLogin ? "Log In" : "Sign Up";
-          return;
-        }
-
-        if (isLogin) {
-          // Login succeeded — save the token and show the app
-          token    = data.token;
-          username = data.username;
-          localStorage.setItem("token", token);
-          localStorage.setItem("username", username);
-          showApp();
-          setupPage();  // wire up the rest of the page now that we're in
-        } else {
-          // Register succeeded — switch to login mode so they can sign in
-          errorEl.style.color = "#4caf8a";
-          errorEl.textContent = "Account created! You can now log in.";
-          isLogin = true;
-          document.getElementById("auth-title").textContent    = "Welcome back";
-          document.getElementById("auth-subtitle").textContent = "Log in to your account.";
-          btn.textContent = "Log In";
-        }
-
-      } catch (err) {
-        errorEl.textContent = "Network error. Is the server running?";
-        btn.textContent = isLogin ? "Log In" : "Sign Up";
-      }
-    });
-
-    // ── LOGOUT ───────────────────────────────────────────────────────
-    document.getElementById("logout-btn").addEventListener("click", async () => {
-      // Tell the server to delete the token from the database
-      await fetch("/api/logout", {
+    try {
+      const res  = await fetch(isLogin ? "/api/login" : "/api/register", {
         method: "POST",
-        headers: { "Authorization": "Bearer " + token }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: email, password })
       });
-      // Clear the token from the browser and go back to the login screen
-      localStorage.removeItem("token");
-      localStorage.removeItem("username");
-      token    = null;
-      username = null;
-      showAuth();
-    });
+      const data = await res.json();
 
-    // ── PAGE SETUP (runs after login) ────────────────────────────────
-    // All the check-in form logic lives here so it only runs when logged in.
-    function setupPage() {
-
-      // Wire up rating buttons (1–5)
-      document.querySelectorAll(".rating-group").forEach(group => {
-        const buttons = group.querySelectorAll("button");
-        buttons.forEach(btn => {
-          btn.addEventListener("click", () => {
-            buttons.forEach(b => b.classList.remove("selected"));
-            btn.classList.add("selected");
-          });
-        });
-      });
-
-      // ── Habits toggle (open/close panel) ──────────────────────────
-      const habitsToggle = document.getElementById("habits-toggle");
-      const habitsPanel  = document.getElementById("habits-panel");
-      const habitsBadge  = document.getElementById("habits-badge");
-
-      habitsToggle.addEventListener("click", () => {
-        habitsToggle.classList.toggle("open");
-        habitsPanel.classList.toggle("open");
-      });
-
-      // Wire up habit yes/no buttons
-      // After each selection, check if all habits are answered and update the badge
-      document.querySelectorAll(".habit-group").forEach(group => {
-        const buttons = group.querySelectorAll("button");
-        buttons.forEach(btn => {
-          btn.addEventListener("click", () => {
-            buttons.forEach(b => b.classList.remove("selected"));
-            btn.classList.add("selected");
-            updateHabitBadge();
-          });
-        });
-      });
-
-      function updateHabitBadge() {
-        // Check if every habit group has a selection
-        const groups    = document.querySelectorAll(".habit-group");
-        const allDone   = [...groups].every(g => g.querySelector(".selected"));
-        habitsBadge.textContent = allDone ? "✓ Done" : "Required";
-        habitsBadge.className   = allDone ? "badge done" : "badge";
+      if (!res.ok) {
+        errorEl.textContent = data.detail || "Something went wrong.";
+        btn.textContent = isLogin ? "Log In" : "Sign Up";
+        return;
       }
 
-      // Helper: read a habit button's selected value (true/false or null if none picked)
-      function getHabit(fieldName) {
-        const group    = document.querySelector(`.habit-group[data-habit="${fieldName}"]`);
-        const selected = group ? group.querySelector(".selected") : null;
-        if (!selected) return null;
-        return selected.dataset.value === "true";
+      if (isLogin) {
+        token = data.token;
+        localStorage.setItem("token", token);
+        localStorage.setItem("username", data.username);
+        window.location.href = "/checkin";
+      } else {
+        errorEl.style.color = "var(--green)";
+        errorEl.textContent = "Account created! You can now log in.";
+        isLogin = true;
+        refreshAuthToggle();
       }
-
-      // Set today's date by default
-      document.getElementById("date").value = new Date().toISOString().slice(0, 10);
-
-      // Helper to read selected rating button
-      function getRating(fieldName) {
-        const group    = document.querySelector(`.rating-group[data-field="${fieldName}"]`);
-        const selected = group.querySelector(".selected");
-        return selected ? parseInt(selected.textContent) : null;
-      }
-
-      // Check-in form submission
-      const form     = document.getElementById("checkin-form");
-      const statusEl = document.getElementById("status");
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const soreness = getRating("soreness");
-        const energy   = getRating("energy");
-        const mood     = getRating("mood");
-
-        if (!soreness || !energy || !mood) {
-          statusEl.textContent = "Please select a value for all ratings.";
-          statusEl.className   = "err";
-          return;
-        }
-
-        // Validate habits — all must have Yes or No selected
-        const alcohol_use = getHabit("alcohol_use");
-        const naps        = getHabit("naps");
-        // ── ADD MORE HABIT VALIDATION HERE ───────────────────────────
-        // const meditation = getHabit("meditation");
-
-        const habitError = document.getElementById("habit-error");
-        if (alcohol_use === null || naps === null) {
-          habitError.textContent = "Please answer all habit questions.";
-          // Auto-open the habits panel so the user sees what's missing
-          habitsToggle.classList.add("open");
-          habitsPanel.classList.add("open");
-          habitsPanel.scrollIntoView({ behavior: "smooth", block: "center" });
-          return;
-        }
-        habitError.textContent = "";
-
-        const payload = {
-          date:           document.getElementById("date").value,
-          resting_hr:     parseInt(document.getElementById("resting_hr").value),
-          sleep_hours:    parseFloat(document.getElementById("sleep_hours").value),
-          soreness,
-          energy,
-          mood,
-          cardio_minutes: parseInt(document.getElementById("cardio_minutes").value) || 0,
-          alcohol_use,
-          naps
-          // ── ADD MORE HABITS TO PAYLOAD HERE ───────────────────────
-          // meditation,
-        };
-
-        try {
-          // Now we send the Authorization header with every request
-          // so the server knows who is making the call.
-          const res = await fetch("/api/checkin", {
-            method: "POST",
-            headers: {
-              "Content-Type":  "application/json",
-              "Authorization": "Bearer " + token
-            },
-            body: JSON.stringify(payload)
-          });
-
-          if (!res.ok) {
-            // If the server returns 401 (Unauthorized), the token expired — log out
-            if (res.status === 401) { localStorage.clear(); showAuth(); return; }
-            const err = await res.json();
-            throw new Error(err.detail || JSON.stringify(err));
-          }
-
-          statusEl.textContent = "✓ Check-in saved!";
-          statusEl.className   = "ok";
-          document.querySelectorAll(".rating-group button").forEach(b => b.classList.remove("selected"));
-
-        } catch (err) {
-          statusEl.textContent = "Error: " + err.message;
-          statusEl.className   = "err";
-        }
-      });
+    } catch {
+      errorEl.textContent = "Network error. Is the server running?";
+      btn.textContent = isLogin ? "Log In" : "Sign Up";
     }
+  });
 
-    // If we were already logged in when the page loaded, set up the page now
-    if (token) setupPage();
-
-  </script>
+  // ── FAQ ACCORDION ─────────────────────────────────────────────────────
+  document.querySelectorAll(".faq-question").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const answer  = btn.nextElementSibling;
+      const isOpen  = answer.classList.contains("open");
+      // Close all
+      document.querySelectorAll(".faq-answer").forEach(a => a.classList.remove("open"));
+      document.querySelectorAll(".faq-question").forEach(b => b.classList.remove("open"));
+      // Open this one if it was closed
+      if (!isOpen) {
+        answer.classList.add("open");
+        btn.classList.add("open");
+      }
+    });
+  });
+</script>
 </body>
 </html>

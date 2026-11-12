@@ -163,6 +163,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def read_root():
     return FileResponse("static/index.html")
 
+@app.get("/checkin")
+def read_checkin():
+    return FileResponse("static/checkin.html")
+
 
 # ── REGISTER ────────────────────────────────────────────────────────────────
 @app.post("/api/register")
@@ -241,17 +245,10 @@ def logout(authorization: str = Header(...)):
 
 # ── SAVE A CHECK-IN (protected) ──────────────────────────────────────────────
 @app.post("/api/checkin")
-def create_checkin(data: CheckInCreate, current_user: User = Header(None)):
-    """
-    Save a check-in. The user must be logged in.
-    We read their identity from the Authorization header via get_current_user,
-    then attach their user_id to the saved row.
-    """
-    # Manually call get_current_user here so we can pass the header
-    # (FastAPI Depends() would be cleaner but this keeps it explicit for learning)
-    from fastapi import Request
-    log = DailyLog(**data.dict())
-
+def create_checkin(data: CheckInCreate, authorization: str = Header(...)):
+    """Save a check-in tied to the logged-in user."""
+    user = get_current_user(authorization)
+    log  = DailyLog(**data.dict(), user_id=user.id)
     with Session(engine) as session:
         session.add(log)
         session.commit()
@@ -262,18 +259,21 @@ def create_checkin(data: CheckInCreate, current_user: User = Header(None)):
 # ── USER COUNT ───────────────────────────────────────────────────────────────
 @app.get("/api/stats")
 def get_stats():
-    """Returns total number of registered users. Useful for tracking growth."""
+    """Returns total number of registered users."""
     with Session(engine) as session:
         count = len(session.exec(select(User)).all())
         return {"total_users": count}
 
 
-# ── GET CHECK-INS (protected) ────────────────────────────────────────────────
+# ── GET CHECK-INS (protected — only returns the logged-in user's data) ────────
 @app.get("/api/checkins")
-def get_checkins():
-    """Return all check-ins with a computed readiness score."""
+def get_checkins(authorization: str = Header(...)):
+    """Return the current user's check-ins with a computed readiness score."""
+    user = get_current_user(authorization)
     with Session(engine) as session:
-        logs = session.exec(select(DailyLog)).all()
+        logs = session.exec(
+            select(DailyLog).where(DailyLog.user_id == user.id)
+        ).all()
 
         results = []
         for log in logs:
