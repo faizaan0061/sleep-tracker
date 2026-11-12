@@ -5,8 +5,8 @@ An app used to track my sleep. Log your morning vitals and see how your sleep, h
 **Live app:** https://sleep-tracker-cmw0.onrender.com
 
 ---
-
-## Leveraged Knowledge
+d
+## Leveraged Knowledge in
 
 ## Tech Stack
 
@@ -25,15 +25,6 @@ An app used to track my sleep. Log your morning vitals and see how your sleep, h
 - **GitHub / GitHub Desktop** — code hosting
 - **Render** — cloud deployment
 - **Virtual Environments (venv)** — Python dependency management
-
-## Features
-
-- User registration and login (token-based auth)
-- Daily check-ins: sleep hours, resting heart rate, soreness, energy, mood, cardio
-- Habits tracking: alcohol use, naps
-- Readiness score (0–100) calculated from your inputs
-- 10-day trend chart
-- FAQ and info sections on the landing page
 
 ## Run Locally
 
