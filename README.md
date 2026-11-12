@@ -1,3 +1,7 @@
 # sleep-tracker
 An app used to track my sleep
-Using 3 essential factors
+Leveraged knowledge in Python, HTML, CSS, JavaScript.
+Used Git (version control)
+Github / GitHub Desktop
+Render (Cloud deployment)
+Virtual Environments (venv)
